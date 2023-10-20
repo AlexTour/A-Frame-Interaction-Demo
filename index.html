@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.1.5/aframe/build/aframe-ar.js"></script>
+  </head>
+  <body>
+    <a-scene embedded arjs="sourceType: webcam">
+      <!-- Central bag scene with a child's bag -->
+      <a-entity
+        gltf-model="books.glb"
+        scale="0.1 0.1 0.1"
+        position="0 0 -5"
+        rotation="0 0 0"
+        puzzle-bag
+        rotation-reader
+      ></a-entity>
+
+      <!-- Agriculture scene with rotating wheat -->
+      <a-entity
+        gltf-model="corn_corn_corn.glb"
+        scale="0.1 0.1 0.1"
+        position="2 0 -2"
+        rotation="0 0 0"
+        puzzle-agriculture
+        rotation-reader
+      ></a-entity>
+
+      <!-- Healthcare scene with a running water sink -->
+      <a-entity
+        gltf-model="sink_running_water-v1.glb"
+        scale="0.1 0.1 0.1"
+        position="-2 0 -5"
+        rotation="0 0 0"
+        puzzle-healthcare
+        rotation-reader
+      ></a-entity>
+
+      <!-- Empowerment scene with the stethoscope -->
+      <a-entity
+        gltf-model="first_aid_kit.glb"
+        scale="0.1 0.1 0.1"
+        position="0 0 2"
+        rotation="0 0 0"
+        puzzle-empowerment
+        rotation-reader
+      ></a-entity>
+    </a-scene>
+  </body>
+</html>
