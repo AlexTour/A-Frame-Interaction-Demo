@@ -1,3 +1,8 @@
+books.glb
+corn_corn_corn.glb
+sink_running_water-v1.glb
+sink_running_water-v1.glb
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -5,20 +10,51 @@
     <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.1.5/aframe/build/aframe-ar.js"></script>
   </head>
   <body>
+    <!-- Assets -->
+    <a-assets>
+      <!-- 3D Models -->
+      <a-asset-item id="maize" src="corn_corn_corn.glb"></a-asset-item>
+      <a-asset-item id="water-sink" src="sink_running_water-v1.glb"></a-asset-item>
+      <a-asset-item id="school-bag" src="books.glb"></a-asset-item>
+      <a-asset-item id="medical-kit" src="first_aid_kit.glb"></a-asset-item>
+
+      <!-- Audio -->
+      <audio id="background-music" src="background.mp3" autoplay="true" loop="true"></audio>
+      <audio id="winning-sound" src="testtest.mp3"></audio>
+    </a-assets>
+
+    <!-- Additional CSS -->
+    <style>
+      #open-left-button,
+      #open-right-button {
+        position: absolute;
+        top: 20px;
+        font-size: 20px;
+        color: white;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+      }
+
+      #score-display {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 24px;
+        color: white;
+      }
+    </style>
+
     <a-scene embedded arjs="sourceType: webcam">
-      <!-- Central bag scene with a child's bag -->
+      <!-- Score Display -->
       <a-entity
-        gltf-model="books.glb"
-        scale="0.1 0.1 0.1"
-        position="0 0 -5"
-        rotation="0 0 0"
-        puzzle-bag
-        rotation-reader
+        id="score-display"
+        text="value: Score: 0; align: left; width: 2"
       ></a-entity>
 
-      <!-- Agriculture scene with rotating wheat -->
+      <!-- Agriculture scene with maize field -->
       <a-entity
-        gltf-model="corn_corn_corn.glb"
+        gltf-model="#maize"
         scale="0.1 0.1 0.1"
         position="2 0 -2"
         rotation="0 0 0"
@@ -26,25 +62,276 @@
         rotation-reader
       ></a-entity>
 
-      <!-- Healthcare scene with a running water sink -->
+      <!-- Sanitation and Hygiene scene with running water sink -->
       <a-entity
-        gltf-model="sink_running_water-v1.glb"
+        gltf-model="#water-sink"
         scale="0.1 0.1 0.1"
         position="-2 0 -5"
         rotation="0 0 0"
-        puzzle-healthcare
+        puzzle-sanitation
         rotation-reader
       ></a-entity>
 
-      <!-- Empowerment scene with the stethoscope -->
+      <!-- Education scene with school bag -->
       <a-entity
-        gltf-model="first_aid_kit.glb"
+        gltf-model="#school-bag"
         scale="0.1 0.1 0.1"
         position="0 0 2"
         rotation="0 0 0"
+        puzzle-education
+        rotation-reader
+      ></a-entity>
+
+      <!-- Empowerment scene with medical kit -->
+      <a-entity
+        gltf-model="#medical-kit"
+        scale="0.1 0.1 0.1"
+        position="0 0 -5"
+        rotation="0 45 0"
         puzzle-empowerment
         rotation-reader
       ></a-entity>
+
+      <!-- Info Panel -->
+      <a-entity
+        id="info-panel"
+        position="0 1 -4"
+        text="value: Click to learn more; align: center; width: 2"
+        visible="false"
+        info-panel
+      ></a-entity>
+
+      <!-- Buttons for sanitation scene -->
+      <button
+        id="open-left-button"
+        visible="false"
+        onclick="openSanitationDoors()"
+      >
+        Open
+      </button>
+      <button
+        id="open-right-button"
+        visible="false"
+        onclick="openSanitationDoors()"
+      >
+        Open
+      </button>
+
+      <!-- Fade screen for sanitation scene -->
+      <a-plane
+        id="fade-screen"
+        position="0 0 -3"
+        width="100"
+        height="100"
+        material="color: black; opacity: 0"
+      ></a-plane>
     </a-scene>
+    <script>
+      // Initialize score
+let score = 0;
+
+// Inline script for puzzle-agriculture
+AFRAME.registerComponent("puzzle-agriculture", {
+  init: function () {
+    const el = this.el;
+    let harvested = false;
+
+    el.addEventListener("click", () => {
+      if (!harvested) {
+        harvested = true;
+
+        // Scale down the maize in a fancy way
+        el.setAttribute("animation__harvest", {
+          property: "scale",
+          from: "0.1 0.1 0.1",
+          to: "0.001 0.001 0.001",
+          dur: 1000,
+          easing: "easeOutElastic",
+        });
+
+        // Update the score and display it
+        score += 10;
+        updateScoreDisplay();
+
+        // Display a message about harvesting
+        alert("You've harvested corn! Your support is helping communities thrive.");
+
+        // Play winning sound
+        const winningSound = document.getElementById("winning-sound");
+        winningSound.components.sound.playSound();
+      }
+    });
+
+    // Change color on hover for a fun interaction
+    el.addEventListener("mouseenter", () => {
+      el.setAttribute("color", "yellow");
+    });
+
+    el.addEventListener("mouseleave", () => {
+      el.setAttribute("color", "green");
+    });
+  },
+});
+
+// Inline script for puzzle-sanitation
+AFRAME.registerComponent("puzzle-sanitation", {
+  init: function () {
+    const el = this.el;
+    let cleaned = false;
+
+    el.addEventListener("click", () => {
+      if (!cleaned) {
+        cleaned = true;
+
+        // Display buttons to open and start water animation
+        el.setAttribute("visible", "false");
+        document.getElementById("open-left-button").setAttribute("visible", "true");
+        document.getElementById("open-right-button").setAttribute("visible", "true");
+
+        // Play the sound of water
+        const waterSound = document.getElementById("water-sound");
+        waterSound.components.sound.playSound();
+
+        // Fade in effect
+        const fadeScreen = document.getElementById("fade-screen");
+        fadeScreen.setAttribute("animation__fadein", {
+          property: "material.opacity",
+          from: "0",
+          to: "1",
+          dur: 3000,
+        });
+
+        setTimeout(() => {
+          // Hide the fade screen after 5 seconds
+          fadeScreen.setAttribute("animation__fadeout", {
+            property: "material.opacity",
+            from: "1",
+            to: "0",
+            dur: 3000,
+          });
+
+          // Show the info panel after the fadeout
+          const infoPanel = document.getElementById("info-panel");
+          infoPanel.setAttribute("visible", "true");
+        }, 5000);
+
+        // Update the score and display it
+        score += 20;
+        updateScoreDisplay();
+
+        // Play winning sound
+        const winningSound = document.getElementById("winning-sound");
+        winningSound.components.sound.playSound();
+      }
+    });
+
+    // Change color on proximity for added engagement
+    el.addEventListener("raycaster-intersected", () => {
+      el.setAttribute("color", "blue");
+    });
+
+    el.addEventListener("raycaster-intersected-cleared", () => {
+      el.setAttribute("color", "white");
+    });
+  },
+});
+
+// Inline script for puzzle-education
+AFRAME.registerComponent("puzzle-education", {
+  init: function () {
+    const el = this.el;
+
+    el.addEventListener("mouseenter", () => {
+      // Simulate flipping the pages of the book when looking at it
+      el.setAttribute("animation__flip", {
+        property: "rotation",
+        from: "0 0 0",
+        to: "0 180 0",
+        dur: 500,
+      });
+
+      // Display onboarding instructions on the first interaction
+      if (!el.getAttribute("flipped")) {
+        el.setAttribute("info-panel", "visible", "true");
+        el.setAttribute("flipped", true);
+      }
+    });
+  },
+});
+
+// Inline script for puzzle-empowerment
+AFRAME.registerComponent("puzzle-empowerment", {
+  init: function () {
+    const el = this.el;
+    let tapCount = 0;
+
+    el.addEventListener("click", () => {
+      tapCount++;
+
+      if (tapCount >= 3) {
+        // Simulate providing healthcare guidance with a pulse animation
+        el.setAttribute("animation__pulse", {
+          property: "scale",
+          from: "0.1 0.1 0.1",
+          to: "0.12 0.12 0.12",
+          dur: 1000,
+        });
+
+        // Display a message about providing guidance
+        alert("You've provided healthcare guidance to a virtual patient!");
+
+        // Update the score and display it
+        score += 15;
+        updateScoreDisplay();
+
+        // Play winning sound
+        const winningSound = document.getElementById("winning-sound");
+        winningSound.components.sound.playSound();
+      }
+    });
+
+    // Change color on proximity for added engagement
+    el.addEventListener("raycaster-intersected", () => {
+      el.setAttribute("color", "red");
+    });
+
+    el.addEventListener("raycaster-intersected-cleared", () => {
+      el.setAttribute("color", "white");
+    });
+  },
+});
+
+// Inline script for opening the sanitation scene's doors
+function openSanitationDoors() {
+  const leftButton = document.getElementById("open-left-button");
+  const rightButton = document.getElementById("open-right-button");
+  const fadeScreen = document.getElementById("fade-screen");
+  const waterSound = document.getElementById("water-sound");
+
+  leftButton.style.display = "none";
+  rightButton.style display = "none";
+
+  fadeScreen.setAttribute("animation__fadeout", {
+    property: "material.opacity",
+    from: "1",
+    to: "0",
+    dur: 3000,
+  });
+
+  setTimeout(() => {
+    const infoPanel = document.getElementById("info-panel");
+    infoPanel.setAttribute("visible", "true");
+  }, 3000);
+
+  waterSound.components.sound.pauseSound();
+}
+
+// Function to update the score display
+function updateScoreDisplay() {
+  const scoreDisplay = document.getElementById("score-display");
+  scoreDisplay.setAttribute("text", "value: Score: " + score + "; align: left; width: 2");
+}
+
+    </script>
   </body>
 </html>
